@@ -1,6 +1,9 @@
+import { handlePreflight } from "@/utils/cors.util";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  handlePreflight(req, res);
+
   if (req.method !== "POST") {
     return res
       .status(405)

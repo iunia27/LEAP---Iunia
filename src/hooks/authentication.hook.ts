@@ -16,7 +16,7 @@ export const useAuthentication = (): UseFetchUserReturn => {
       method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json, authorization",
       },
       body: JSON.stringify(credentials),
     });
@@ -29,11 +29,11 @@ export const useAuthentication = (): UseFetchUserReturn => {
   };
 
   const logout = async () => {
-    const response = await fetch(`http://api.mayhem.local:3000/api/logout`, {
+    const response = await fetch(`${API_URL}/logout`, {
       method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; ",
       },
     });
 
