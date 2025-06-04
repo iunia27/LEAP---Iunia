@@ -1,12 +1,20 @@
-import { useSubmitForm } from "@/hooks/submitForm.hook";
+import { SubmitContactFormResult, submitContactForm } from "@/app/actions";
+import { useActionState, useEffect, useState } from "react";
 
-const Landing: React.FC = () => {
-  const { submitForm } = useSubmitForm();
+export default function Landing(){
+  const initialState: SubmitContactFormResult = { errors: {}, message: '', enteredValue: { fullName: '', email: '', message: '' }};
+  const [formState, formAction, isPending] = useActionState((prevState: SubmitContactFormResult, formData: FormData) => submitContactForm(prevState, formData),  initialState);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
 
-  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await submitForm({});
-  };
+  useEffect(() => {
+  if (formState.success) {
+   setFullName('');
+    setEmail('');
+    setMessage('');
+  }
+}, [formState]);
 
   return (
     <>
@@ -116,8 +124,9 @@ const Landing: React.FC = () => {
           <h2 className="text-3xl font-bold text-center mb-8">Contact Us</h2>
 
           <form
-            onSubmit={handleFormSubmit}
-            method="POST"
+            // onSubmit={(e) => handleFormSubmit(e, { fullName, email, message })}
+
+            action={formAction}
             className="bg-gray-50 p-8 rounded-lg shadow-md"
           >
             <div className="mb-6">
@@ -127,13 +136,22 @@ const Landing: React.FC = () => {
               >
                 Full Name
               </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                placeholder="Enter your full name"
-                className="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  placeholder="Enter your full name"
+                  className="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={isPending}
+                />
+                {formState?.errors?.fullName && (   
+                 <div
+              id="formError"
+              className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"
+            >{formState.errors?.fullName}</div>
+                )}
             </div>
 
             <div className="mb-6">
@@ -150,7 +168,16 @@ const Landing: React.FC = () => {
                 placeholder="your@email.com"
                 pattern="^[^@]+@[^@]+\.[^@]+$"
                 className="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isPending}
               />
+                {formState?.errors?.email && (   
+                 <div
+              id="formError"
+              className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"
+            >{formState.errors?.email}</div>
+                )}
             </div>
 
             <div className="mb-6">
@@ -166,14 +193,25 @@ const Landing: React.FC = () => {
                 rows={4}
                 placeholder="How can we help you?"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={ message}
+                onChange={(e) => setMessage(e.target.value)}
+                disabled={isPending}
               ></textarea>
+                {formState?.errors?.message && (   
+                 <div
+              id="formError"
+              className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"
+            >{formState.errors?.message}</div>
+                )}
             </div>
 
             <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-300"
+              type="submit"  disabled={isPending}
+              className={`w-full text-white font-medium py-3 rounded-lg transition duration-300  ${isPending ? "opacity-50 cursor-not-allowed bg bg-gray-600 hover:bg-gray-700 " : "bg-blue-600 hover:bg-blue-700 "}`}
+              
             >
-              Send Message
+              {isPending && "Loading ..."}
+              {!isPending && "Submit Form"}
             </button>
           </form>
 
@@ -183,13 +221,21 @@ const Landing: React.FC = () => {
           >
             Thank you for contacting us!
           </div>
-
-          <div
-            id="formError"
-            className="hidden mt-4 p-4 bg-red-100 text-red-700 rounded-lg"
-          >
-            Something went wrong. Please try again.
-          </div>
+          {formState?.success === false && (
+            <div
+              id="formError"
+              className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"
+            >
+              {formState.message || "Something went wrong. Please try again."}
+            </div>
+          )}{(formState?.success === true  &&(
+            <div
+            id="formSuccess"
+            className="mt-4 p-4 bg-green-100 text-green-700 rounded-lg"
+            >
+              {formState.message || "Thank you for contacting us!"}
+              </div>
+          ))}
         </div>
       </section>
 
@@ -254,4 +300,3 @@ const Landing: React.FC = () => {
   );
 };
 
-export default Landing;

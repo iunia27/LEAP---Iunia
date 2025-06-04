@@ -1,5 +1,12 @@
+export type ContactUsItem = {
+  fullName: string
+  email: string
+  message: string
+}
 export const useSubmitForm = () => {
-  const submitForm = async (data: unknown) => {
+
+  const submitForm = async (data: ContactUsItem) => {
+    console.log("Submitting form with data:", data);
     try {
       const response = await fetch("/api/contactable", {
         method: "POST",
@@ -17,6 +24,9 @@ export const useSubmitForm = () => {
       throw err;
     }
   };
-
+  // Return the submitForm function to be used in components
   return { submitForm };
 };
+
+
+   
